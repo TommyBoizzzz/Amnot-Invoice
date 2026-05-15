@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:invoice_create_app/features/Settings/presentation/screens/setting.dart';
 import 'package:invoice_create_app/features/customer/presentation/screens/customer.dart';
 import 'package:invoice_create_app/features/invoice/presentation/screens/invoice_form_screen.dart';
-import 'package:invoice_create_app/features/items/presentation/screens/items.dart';
 
 class NavBarScreen extends StatefulWidget {
   const NavBarScreen({super.key});
@@ -15,9 +14,8 @@ class _NavBarScreenState extends State<NavBarScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const ItemScreen(),
-    const CustomerScreen(),
     const InvoiceFormScreen(),
+    const CustomerScreen(),
     const SettingScreen(),
   ];
 
@@ -35,10 +33,10 @@ class _NavBarScreenState extends State<NavBarScreen> {
           child: Container(
             height: 72,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.75),
+              color: Colors.white.withOpacity(0.75),
               borderRadius: BorderRadius.circular(50),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: Colors.white.withOpacity(0.9),
                 width: 1.2,
               ),
               boxShadow: const [
@@ -49,14 +47,15 @@ class _NavBarScreenState extends State<NavBarScreen> {
                 ),
               ],
             ),
+
             child: LayoutBuilder(
               builder: (context, constraints) {
-                // 4 tabs: Items, Customers, Invoices, Settings
-                final double itemWidth = constraints.maxWidth / 4;
+                // 3 tabs
+                final double itemWidth = constraints.maxWidth / 3;
 
                 return Stack(
                   children: [
-                    /// Sliding glass indicator
+                    /// Animated sliding indicator
                     AnimatedPositioned(
                       duration: const Duration(milliseconds: 380),
                       curve: Curves.easeOutCubic,
@@ -67,20 +66,16 @@ class _NavBarScreenState extends State<NavBarScreen> {
                         padding: const EdgeInsets.all(6),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(
-                              0xFF1E88E5,
-                            ).withValues(alpha: 0.15),
+                            color: const Color(0xFF1E88E5).withOpacity(0.15),
                             borderRadius: BorderRadius.circular(40),
                             border: Border.all(
-                              color: const Color(
-                                0xFF1E88E5,
-                              ).withValues(alpha: 0.25),
+                              color: const Color(0xFF1E88E5).withOpacity(0.25),
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: const Color(
                                   0xFF1E88E5,
-                                ).withValues(alpha: 0.20),
+                                ).withOpacity(0.20),
                                 blurRadius: 12,
                                 spreadRadius: 1,
                               ),
@@ -90,13 +85,15 @@ class _NavBarScreenState extends State<NavBarScreen> {
                       ),
                     ),
 
-                    /// Navigation items
+                    /// Navigation Items
                     Row(
                       children: [
-                        _buildItem(Icons.inventory_2_rounded, 'Items', 0),
-                        _buildItem(Icons.people_rounded, 'Customers', 1),
-                        _buildItem(Icons.receipt_long_rounded, 'Invoices', 2),
-                        _buildItem(Icons.settings_rounded, 'Settings', 3),
+                        _buildItem(Icons.receipt_long_rounded, 'Invoices', 0),
+
+                        /// History Icon Added
+                        _buildItem(Icons.history_rounded, 'History', 1),
+
+                        _buildItem(Icons.settings_rounded, 'Settings', 2),
                       ],
                     ),
                   ],
@@ -119,12 +116,16 @@ class _NavBarScreenState extends State<NavBarScreen> {
             _currentIndex = index;
           });
         },
+
+        behavior: HitTestBehavior.opaque,
+
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedScale(
               duration: const Duration(milliseconds: 250),
-              scale: isSelected ? 1.25 : 1.0,
+              scale: isSelected ? 1.2 : 1.0,
+
               child: Icon(
                 icon,
                 size: 26,
@@ -136,11 +137,13 @@ class _NavBarScreenState extends State<NavBarScreen> {
 
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 250),
+
               style: TextStyle(
                 color: isSelected ? const Color(0xFF1E88E5) : Colors.grey[700],
-                fontSize: isSelected ? 13.0 : 12.0,
+                fontSize: isSelected ? 13 : 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
+
               child: Text(label),
             ),
           ],
