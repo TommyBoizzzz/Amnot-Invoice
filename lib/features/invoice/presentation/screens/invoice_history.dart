@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:invoice_create_app/features/invoice/presentation/models/invoice.dart';
-import '../../../../services/database_helper.dart';
+import '../services/database_helper.dart';
 import 'invoice_preview_screen.dart';
 
 class InvoiceHistoryScreen extends StatefulWidget {

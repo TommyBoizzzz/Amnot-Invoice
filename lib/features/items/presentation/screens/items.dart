@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:invoice_create_app/features/invoice/presentation/models/invoice_item.dart';
-import 'package:invoice_create_app/services/database_helper.dart';
+import 'package:invoice_create_app/features/invoice/presentation/services/database_helper.dart';
 
 class AdjustItemScreen extends StatefulWidget {
   const AdjustItemScreen({super.key});
