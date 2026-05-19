@@ -539,20 +539,20 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                     ],
 
                     InkWell(
-                      onTap: () async {
-                        final InvoiceItem? item = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AdjustItemScreen(),
-                          ),
-                        );
+                      // onTap: () async {
+                      //   final InvoiceItem? item = await Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (_) => const AdjustItemScreen(),
+                      //     ),
+                      //   );
 
-                        if (item != null) {
-                          setState(() {
-                            items.add(item);
-                          });
-                        }
-                      },
+                      //   if (item != null) {
+                      //     setState(() {
+                      //       items.add(item);
+                      //     });
+                      //   }
+                      // },
                       borderRadius: BorderRadius.circular(12),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 8),

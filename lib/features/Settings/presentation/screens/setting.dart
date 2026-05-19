@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:invoice_create_app/features/items/presentation/screens/items.dart';
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
@@ -204,12 +205,12 @@ class SettingScreen extends StatelessWidget {
                       icon: Icons.inventory_2_rounded,
                       color: Colors.blue,
                       onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (_) => const AdjustItemScreen(),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ItemsScreen(),
+                          ),
+                        );
                         _showComingSoon(context, 'Items');
                       },
                     ),
