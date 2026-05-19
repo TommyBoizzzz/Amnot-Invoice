@@ -10,13 +10,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Invoice App',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-
-      // Default screen when app starts
-      home: NavBarScreen(),
-    );
+    return MaterialApp(debugShowCheckedModeBanner: false, home: NavBarScreen());
   }
 }

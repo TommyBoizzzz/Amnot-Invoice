@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:invoice_create_app/features/Settings/presentation/screens/setting.dart';
-import 'package:invoice_create_app/features/invoice/presentation/screens/invoice_create.dart';
-import 'package:invoice_create_app/features/invoice/presentation/screens/invoice_history.dart';
+import 'package:invoice_create_app/features/invoice/presentation/screens/invoice.dart';
+import 'package:invoice_create_app/features/report/presentation/screens/report.dart';
 
 class NavBarScreen extends StatefulWidget {
   const NavBarScreen({super.key});
@@ -15,7 +15,7 @@ class _NavBarScreenState extends State<NavBarScreen> {
 
   final List<Widget> _screens = [
     const InvoiceFormScreen(),
-    const InvoiceHistoryScreen(),
+    const ReportScreen(),
     const SettingScreen(),
   ];
 
@@ -90,8 +90,7 @@ class _NavBarScreenState extends State<NavBarScreen> {
                       children: [
                         _buildItem(Icons.receipt_long_rounded, 'Invoices', 0),
 
-                        /// History Icon Added
-                        _buildItem(Icons.history_rounded, 'History', 1),
+                        _buildItem(Icons.assessment_rounded, 'Report', 1),
 
                         _buildItem(Icons.settings_rounded, 'Settings', 2),
                       ],

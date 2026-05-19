@@ -4,6 +4,7 @@ import 'package:invoice_create_app/features/invoice/presentation/models/invoice.
 import 'package:invoice_create_app/features/invoice/presentation/models/invoice_item.dart';
 import 'package:invoice_create_app/features/invoice/presentation/screens/invoice_history.dart';
 import 'package:invoice_create_app/features/invoice/presentation/screens/invoice_preview_screen.dart';
+import 'package:invoice_create_app/features/items/presentation/screens/items.dart';
 import '../../../../services/database_helper.dart';
 
 class InvoiceFormScreen extends StatefulWidget {
@@ -129,58 +130,6 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const InvoiceHistoryScreen()),
-    );
-  }
-
-  // ===================== DIALOG TO ADD ITEM =====================
-
-  void showAddItemDialog() {
-    descriptionController.clear();
-    quantityController.clear();
-    priceController.clear();
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Add Item'),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: quantityController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Quantity'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: priceController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: const InputDecoration(labelText: 'Unit Price'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
-          ),
-          ElevatedButton(
-            child: const Text('Add'),
-            onPressed: () {
-              addItem();
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
     );
   }
 
@@ -501,7 +450,6 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // ================= Invoice Info =================
               buildSectionTitle('Invoice Info'),
               buildCard(
                 child: Column(
@@ -513,41 +461,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                       customerController.text.isEmpty
                           ? 'Select Customer'
                           : customerController.text,
-                      onTap: () async {
-                        final result = await showDialog<String>(
-                          context: context,
-                          builder: (_) {
-                            final controller = TextEditingController(
-                              text: customerController.text,
-                            );
-
-                            return AlertDialog(
-                              title: const Text('Customer Name'),
-                              content: TextField(
-                                controller: controller,
-                                autofocus: true,
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cancel'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, controller.text),
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-
-                        if (result != null) {
-                          setState(() {
-                            customerController.text = result;
-                          });
-                        }
-                      },
+                      onTap: () {},
                     ),
                   ],
                 ),
@@ -625,7 +539,20 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                     ],
 
                     InkWell(
-                      onTap: showAddItemDialog,
+                      onTap: () async {
+                        final InvoiceItem? item = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AdjustItemScreen(),
+                          ),
+                        );
+
+                        if (item != null) {
+                          setState(() {
+                            items.add(item);
+                          });
+                        }
+                      },
                       borderRadius: BorderRadius.circular(12),
                       child: const Padding(
                         padding: EdgeInsets.symmetric(vertical: 8),
