@@ -1,6 +1,6 @@
-// lib/features/items/presentation/screens/update_item_screen.dart
-
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:invoice_create_app/features/items/presentation/model/item_model.dart';
 import 'package:invoice_create_app/features/items/presentation/services/database_helper.dart';
 
@@ -20,17 +20,28 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
   final TextEditingController priceController = TextEditingController();
 
   final ItemDatabaseHelper _dbHelper = ItemDatabaseHelper.instance;
+  final ImagePicker _picker = ImagePicker();
 
+  File? _selectedImage;
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
 
+    // Load existing item data
     nameController.text = widget.item.itemName;
     codeController.text = widget.item.itemCode;
     noteController.text = widget.item.note;
     priceController.text = widget.item.unitPrice.toString();
+
+    // Load existing image if available
+    if (widget.item.imagePath.isNotEmpty) {
+      final file = File(widget.item.imagePath);
+      if (file.existsSync()) {
+        _selectedImage = file;
+      }
+    }
   }
 
   @override
@@ -42,7 +53,21 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
     super.dispose();
   }
 
-  // ================= UPDATE ITEM =================
+  // PICK IMAGE
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  // UPDATE ITEM
   Future<void> _updateItem() async {
     if (nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,7 +87,7 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
       itemCode: codeController.text.trim(),
       note: noteController.text.trim(),
       unitPrice: double.tryParse(priceController.text.trim()) ?? 0.0,
-      imagePath: widget.item.imagePath,
+      imagePath: _selectedImage?.path ?? '',
     );
 
     await _dbHelper.updateItem(updatedItem);
@@ -72,7 +97,7 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
     Navigator.pop(context, true);
   }
 
-  // ================= INPUT FIELD =================
+  // INPUT FIELD
   Widget _buildField({
     required String label,
     required String hint,
@@ -126,7 +151,7 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
     );
   }
 
-  // ================= CARD =================
+  // Card Design
   Widget _buildCard({required Widget child}) {
     return Container(
       width: double.infinity,
@@ -147,13 +172,13 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
     );
   }
 
-  // ================= BUILD =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
 
       appBar: AppBar(
+        toolbarHeight: 90,
         backgroundColor: Colors.white,
         elevation: 0,
         surfaceTintColor: Colors.white,
@@ -172,6 +197,9 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
         actions: [
           TextButton(
             onPressed: _isSaving ? null : _updateItem,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+            ),
             child: Text(
               _isSaving ? 'Saving...' : 'Update',
               style: const TextStyle(
@@ -188,7 +216,6 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // BASIC INFO
             _buildCard(
               child: Column(
                 children: [
@@ -208,15 +235,15 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
                     label: 'Unit Price',
                     hint: '0.00',
                     controller: priceController,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 16),
 
-            // NOTE
             _buildCard(
               child: _buildField(
                 label: 'Note',
@@ -225,8 +252,65 @@ class _UpdateItemScreenState extends State<UpdateItemScreen> {
                 maxLines: 4,
               ),
             ),
+            const SizedBox(height: 16),
 
-            const SizedBox(height: 24),
+            _buildCard(
+              child: Column(
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(20),
+                      image: _selectedImage != null
+                          ? DecorationImage(
+                              image: FileImage(_selectedImage!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: _selectedImage == null
+                        ? const Icon(
+                            Icons.image_outlined,
+                            color: Color(0xFF2563EB),
+                            size: 36,
+                          )
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Item Image',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF111827),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Tap below to choose or change image',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _pickImage,
+                    icon: const Icon(Icons.add_photo_alternate_outlined),
+                    label: Text(
+                      _selectedImage == null ? 'Choose Image' : 'Change Image',
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF2563EB),
+                      side: const BorderSide(color: Color(0xFF2563EB)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 60),
           ],
         ),
       ),

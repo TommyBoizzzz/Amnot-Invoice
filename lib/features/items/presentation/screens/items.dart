@@ -1,5 +1,7 @@
 // lib/features/items/presentation/screens/items_screen.dart
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:invoice_create_app/features/items/presentation/model/item_model.dart';
 import 'package:invoice_create_app/features/items/presentation/screens/items_create.dart';
@@ -37,7 +39,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
     super.dispose();
   }
 
-  // ================= LOAD ITEMS =================
+  // LOAD ITEMS
   Future<void> _loadItems() async {
     setState(() => _isLoading = true);
 
@@ -52,7 +54,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
     });
   }
 
-  // ================= FILTER ITEMS =================
+  // FILTER ITEMS
   void _filterItems(String keyword) {
     if (keyword.trim().isEmpty) {
       setState(() {
@@ -66,24 +68,23 @@ class _ItemsScreenState extends State<ItemsScreen> {
     setState(() {
       _filteredItems = _items.where((item) {
         return item.itemName.toLowerCase().contains(lower) ||
-            (item.itemCode ?? '').toLowerCase().contains(lower) ||
-            (item.note ?? '').toLowerCase().contains(lower);
+            item.itemCode.toLowerCase().contains(lower) ||
+            item.note.toLowerCase().contains(lower);
       }).toList();
     });
   }
 
-  // ================= OPEN CREATE SCREEN =================
+  // OPEN CREATE SCREEN
   Future<void> _openCreateItemScreen() async {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const CreateItemScreen()),
     );
 
-    // Refresh grid after returning
     await _loadItems();
   }
 
-  // ================= DELETE ITEM =================
+  // DELETE ITEM
   Future<void> _deleteItem(int id) async {
     await _dbHelper.deleteItem(id);
     await _loadItems();
@@ -98,7 +99,67 @@ class _ItemsScreenState extends State<ItemsScreen> {
     );
   }
 
-  // ================= ITEM CARD =================
+  // SHOW FULL IMAGE
+  void _showFullImage(String imagePath) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(File(imagePath), fit: BoxFit.contain),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ITEM IMAGE
+  Widget _buildItemImage(Item item) {
+    final hasImage =
+        item.imagePath.isNotEmpty && File(item.imagePath).existsSync();
+
+    return GestureDetector(
+      onLongPress: hasImage
+          ? () {
+              _showFullImage(item.imagePath);
+            }
+          : null,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFF6FF),
+          borderRadius: BorderRadius.circular(14),
+          image: hasImage
+              ? DecorationImage(
+                  image: FileImage(File(item.imagePath)),
+                  fit: BoxFit.cover,
+                )
+              : null,
+        ),
+        child: !hasImage
+            ? const Icon(Icons.inventory_2_rounded, color: Color(0xFF2563EB))
+            : null,
+      ),
+    );
+  }
+
+  // ITEM CARD
   Widget _buildItemCard(Item item) {
     return Dismissible(
       key: ValueKey(item.id),
@@ -118,13 +179,14 @@ class _ItemsScreenState extends State<ItemsScreen> {
           _deleteItem(item.id!);
         }
       },
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+
+      child: GestureDetector(
         onTap: () async {
           await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => UpdateItemScreen(item: item)),
           );
+
           await _loadItems();
         },
         child: Container(
@@ -133,29 +195,18 @@ class _ItemsScreenState extends State<ItemsScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.inventory_2_rounded,
-                  color: Color(0xFF2563EB),
-                ),
-              ),
+              _buildItemImage(item),
               const SizedBox(width: 12),
 
               Expanded(
@@ -181,7 +232,6 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   ],
                 ),
               ),
-
               const Icon(Icons.chevron_right_rounded, color: Color(0xFF9CA3AF)),
             ],
           ),
@@ -190,13 +240,12 @@ class _ItemsScreenState extends State<ItemsScreen> {
     );
   }
 
-  // ================= BUILD =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
-
       appBar: AppBar(
+        toolbarHeight: 80,
         backgroundColor: Colors.white,
         elevation: 0,
         surfaceTintColor: Colors.white,
@@ -210,7 +259,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 10),
+            margin: const EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
               color: const Color(0xFFEFF6FF),
               borderRadius: BorderRadius.circular(12),
@@ -225,7 +274,6 @@ class _ItemsScreenState extends State<ItemsScreen> {
 
       body: Column(
         children: [
-          // ================= SEARCH =================
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -253,7 +301,6 @@ class _ItemsScreenState extends State<ItemsScreen> {
             ),
           ),
 
-          // ================= GRID / LIST =================
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())

@@ -1,6 +1,6 @@
-// lib/features/items/presentation/screens/create_item_screen.dart
-
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:invoice_create_app/features/items/presentation/model/item_model.dart';
 import 'package:invoice_create_app/features/items/presentation/services/database_helper.dart';
 
@@ -18,7 +18,9 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
   final TextEditingController priceController = TextEditingController();
 
   final ItemDatabaseHelper _dbHelper = ItemDatabaseHelper.instance;
+  final ImagePicker _picker = ImagePicker();
 
+  File? _selectedImage;
   bool _isSaving = false;
 
   @override
@@ -30,7 +32,21 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
     super.dispose();
   }
 
-  // ================= SAVE ITEM =================
+  // PICK IMAGE
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  // SAVE ITEM
   Future<void> _saveItem() async {
     if (nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -44,18 +60,13 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
 
     setState(() => _isSaving = true);
 
-
     final item = Item(
-      id: null, // optional if your model requires id
+      id: null,
       itemName: nameController.text.trim(),
-      itemCode: codeController.text.trim().isEmpty
-          ? ''
-          : codeController.text.trim(),
-      note: noteController.text.trim().isEmpty
-          ? ''
-          : noteController.text.trim(),
+      itemCode: codeController.text.trim(),
+      note: noteController.text.trim(),
       unitPrice: double.tryParse(priceController.text.trim()) ?? 0.0,
-      imagePath: '',
+      imagePath: _selectedImage?.path ?? '',
     );
 
     await _dbHelper.insertItem(item);
@@ -65,7 +76,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
     Navigator.pop(context, true);
   }
 
-  // ================= INPUT FIELD =================
+  // INPUT FIELD
   Widget _buildField({
     required String label,
     required String hint,
@@ -119,7 +130,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
     );
   }
 
-  // ================= CARD =================
+  // CARD
   Widget _buildCard({required Widget child}) {
     return Container(
       width: double.infinity,
@@ -140,7 +151,6 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
     );
   }
 
-  // ================= BUILD =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,6 +175,9 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
         actions: [
           TextButton(
             onPressed: _isSaving ? null : _saveItem,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+            ),
             child: Text(
               _isSaving ? 'Saving...' : 'Done',
               style: const TextStyle(
@@ -181,7 +194,6 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // ================= BASIC INFO =================
             _buildCard(
               child: Column(
                 children: [
@@ -201,15 +213,15 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                     label: 'Unit Price',
                     hint: '0.00',
                     controller: priceController,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 16),
 
-            // ================= NOTE =================
             _buildCard(
               child: _buildField(
                 label: 'Note',
@@ -218,25 +230,31 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                 maxLines: 4,
               ),
             ),
-
             const SizedBox(height: 16),
 
-            // ================= IMAGE =================
             _buildCard(
               child: Column(
                 children: [
                   Container(
-                    width: 72,
-                    height: 72,
+                    width: 100,
+                    height: 100,
                     decoration: BoxDecoration(
                       color: const Color(0xFFEFF6FF),
                       borderRadius: BorderRadius.circular(20),
+                      image: _selectedImage != null
+                          ? DecorationImage(
+                              image: FileImage(_selectedImage!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
-                    child: const Icon(
-                      Icons.image_outlined,
-                      color: Color(0xFF2563EB),
-                      size: 36,
-                    ),
+                    child: _selectedImage == null
+                        ? const Icon(
+                            Icons.image_outlined,
+                            color: Color(0xFF2563EB),
+                            size: 36,
+                          )
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   const Text(
@@ -254,11 +272,11 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
-                    onPressed: () {
-                      // Add image picker later
-                    },
+                    onPressed: _pickImage,
                     icon: const Icon(Icons.add_photo_alternate_outlined),
-                    label: const Text('Add Image'),
+                    label: Text(
+                      _selectedImage == null ? 'Choose Image' : 'Change Image',
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF2563EB),
                       side: const BorderSide(color: Color(0xFF2563EB)),
@@ -270,8 +288,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
                 ],
               ),
             ),
-
-            const SizedBox(height: 24),
+            const SizedBox(height: 60),
           ],
         ),
       ),
