@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:invoice_create_app/features/customer/presentation/screens/customer.dart';
+import 'package:invoice_create_app/features/invoice/presentation/screens/invoice_history.dart';
 import 'package:invoice_create_app/features/items/presentation/screens/items.dart';
 
 class SettingScreen extends StatelessWidget {
@@ -211,12 +213,12 @@ class SettingScreen extends StatelessWidget {
                       icon: Icons.people_alt_rounded,
                       color: Colors.green,
                       onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (_) => const CustomerScreen(),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CustomerScreen(),
+                          ),
+                        );
                       },
                     ),
                     divider(),
@@ -227,12 +229,12 @@ class SettingScreen extends StatelessWidget {
                       icon: Icons.history_rounded,
                       color: Colors.orange,
                       onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (_) => const InvoiceHistoryScreen(),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const InvoiceHistoryScreen(),
+                          ),
+                        );
                       },
                     ),
                     divider(),
