@@ -83,8 +83,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
           extentRatio: 0.5,
 
           children: [
-            const SizedBox(width: 8), // 👈 GAP between card & Edit
-            // ================= EDIT =================
+            const SizedBox(width: 8),
             Expanded(
               child: GestureDetector(
                 onTap: () async {
@@ -124,7 +123,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
             const SizedBox(width: 8),
 
-            // ================= DELETE =================
             Expanded(
               child: GestureDetector(
                 onTap: () => _confirmDelete(c),
@@ -155,7 +153,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
           ],
         ),
 
-        // ================= CARD =================
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
@@ -218,35 +215,161 @@ class _CustomerScreenState extends State<CustomerScreen> {
     );
   }
 
+  //Delete Dialog
   Future<void> _confirmDelete(Customer c) async {
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder: (_) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 30,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ===== Icon =====
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Color(0xFFEF4444),
+                    size: 36,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ===== Title =====
+                const Text(
+                  'Delete Customer',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // ===== Message =====
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                      color: Color(0xFF6B7280),
+                    ),
+                    children: [
+                      const TextSpan(text: 'Are you sure you want to delete '),
+                      TextSpan(
+                        text: c.fullName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                      const TextSpan(text: '?'),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // ===== Buttons =====
+                Row(
+                  children: [
+                    // Cancel
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          backgroundColor: Colors.white,
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: Color(0xFF374151),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    // Delete
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+
+                          if (c.id != null) {
+                            await _delete(c.id!);
+                          }
+
+                          if (!mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '${c.fullName} deleted successfully',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: const Color(0xFF111827),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFEF4444),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          title: const Text("Delete Customer"),
-          content: Text("Are you sure you want to delete ${c.fullName}?"),
-
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("No"),
-            ),
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              onPressed: () async {
-                Navigator.pop(context);
-
-                if (c.id != null) {
-                  await _delete(c.id!);
-                }
-              },
-              child: const Text("Yes"),
-            ),
-          ],
         );
       },
     );
@@ -256,11 +379,31 @@ class _CustomerScreenState extends State<CustomerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
-
       appBar: AppBar(
-        title: const Text("Customers"),
+        toolbarHeight: 80,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.white,
+        title: const Text(
+          'Customers',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF111827),
+          ),
+        ),
         actions: [
-          IconButton(onPressed: _openCreate, icon: const Icon(Icons.add)),
+          Container(
+            margin: const EdgeInsets.only(right: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEFF6FF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: _openCreate,
+              icon: const Icon(Icons.add, color: Color(0xFF2563EB)),
+            ),
+          ),
         ],
       ),
 
