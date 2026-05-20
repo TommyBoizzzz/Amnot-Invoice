@@ -126,16 +126,6 @@ class SettingScreen extends StatelessWidget {
     return const Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6));
   }
 
-  // ===================== NAVIGATION PLACEHOLDER =====================
-  void _showComingSoon(BuildContext context, String title) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$title screen coming soon'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   // ===================== BUILD =====================
   @override
   Widget build(BuildContext context) {
@@ -211,7 +201,6 @@ class SettingScreen extends StatelessWidget {
                             builder: (_) => const ItemsScreen(),
                           ),
                         );
-                        _showComingSoon(context, 'Items');
                       },
                     ),
                     divider(),
@@ -228,7 +217,6 @@ class SettingScreen extends StatelessWidget {
                         //     builder: (_) => const CustomerScreen(),
                         //   ),
                         // );
-                        _showComingSoon(context, 'Customers');
                       },
                     ),
                     divider(),
@@ -245,7 +233,6 @@ class SettingScreen extends StatelessWidget {
                         //     builder: (_) => const InvoiceHistoryScreen(),
                         //   ),
                         // );
-                        _showComingSoon(context, 'Invoice History');
                       },
                     ),
                     divider(),
@@ -262,7 +249,6 @@ class SettingScreen extends StatelessWidget {
                         //     builder: (_) => const ReportScreen(),
                         //   ),
                         // );
-                        _showComingSoon(context, 'Reports');
                       },
                     ),
                   ],
@@ -286,9 +272,7 @@ class SettingScreen extends StatelessWidget {
                       subtitle: 'Export and import database',
                       icon: Icons.backup_rounded,
                       color: Colors.teal,
-                      onTap: () {
-                        _showComingSoon(context, 'Backup & Restore');
-                      },
+                      onTap: () {},
                     ),
                     divider(),
                     buildSettingItem(

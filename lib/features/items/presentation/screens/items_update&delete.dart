@@ -1,17 +1,19 @@
-// lib/features/items/presentation/screens/create_item_screen.dart
+// lib/features/items/presentation/screens/update_item_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:invoice_create_app/features/items/presentation/model/item_model.dart';
 import 'package:invoice_create_app/features/items/presentation/services/database_helper.dart';
 
-class CreateItemScreen extends StatefulWidget {
-  const CreateItemScreen({super.key});
+class UpdateItemScreen extends StatefulWidget {
+  final Item item;
+
+  const UpdateItemScreen({super.key, required this.item});
 
   @override
-  State<CreateItemScreen> createState() => _CreateItemScreenState();
+  State<UpdateItemScreen> createState() => _UpdateItemScreenState();
 }
 
-class _CreateItemScreenState extends State<CreateItemScreen> {
+class _UpdateItemScreenState extends State<UpdateItemScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController codeController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
@@ -22,6 +24,16 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
   bool _isSaving = false;
 
   @override
+  void initState() {
+    super.initState();
+
+    nameController.text = widget.item.itemName;
+    codeController.text = widget.item.itemCode;
+    noteController.text = widget.item.note;
+    priceController.text = widget.item.unitPrice.toString();
+  }
+
+  @override
   void dispose() {
     nameController.dispose();
     codeController.dispose();
@@ -30,8 +42,8 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
     super.dispose();
   }
 
-  // ================= SAVE ITEM =================
-  Future<void> _saveItem() async {
+  // ================= UPDATE ITEM =================
+  Future<void> _updateItem() async {
     if (nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -44,21 +56,16 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
 
     setState(() => _isSaving = true);
 
-
-    final item = Item(
-      id: null, // optional if your model requires id
+    final updatedItem = Item(
+      id: widget.item.id,
       itemName: nameController.text.trim(),
-      itemCode: codeController.text.trim().isEmpty
-          ? ''
-          : codeController.text.trim(),
-      note: noteController.text.trim().isEmpty
-          ? ''
-          : noteController.text.trim(),
+      itemCode: codeController.text.trim(),
+      note: noteController.text.trim(),
       unitPrice: double.tryParse(priceController.text.trim()) ?? 0.0,
-      imagePath: '',
+      imagePath: widget.item.imagePath,
     );
 
-    await _dbHelper.insertItem(item);
+    await _dbHelper.updateItem(updatedItem);
 
     if (!mounted) return;
 
@@ -155,7 +162,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Create Item',
+          'Update Item',
           style: TextStyle(
             color: Color(0xFF111827),
             fontSize: 20,
@@ -164,9 +171,9 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: _isSaving ? null : _saveItem,
+            onPressed: _isSaving ? null : _updateItem,
             child: Text(
-              _isSaving ? 'Saving...' : 'Done',
+              _isSaving ? 'Saving...' : 'Update',
               style: const TextStyle(
                 color: Color(0xFF2563EB),
                 fontWeight: FontWeight.w600,
@@ -181,7 +188,7 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // ================= BASIC INFO =================
+            // BASIC INFO
             _buildCard(
               child: Column(
                 children: [
@@ -209,65 +216,13 @@ class _CreateItemScreenState extends State<CreateItemScreen> {
 
             const SizedBox(height: 16),
 
-            // ================= NOTE =================
+            // NOTE
             _buildCard(
               child: _buildField(
                 label: 'Note',
                 hint: 'Write your note',
                 controller: noteController,
                 maxLines: 4,
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // ================= IMAGE =================
-            _buildCard(
-              child: Column(
-                children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.image_outlined,
-                      color: Color(0xFF2563EB),
-                      size: 36,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Add Item Image',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF111827),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Upload an optional image for this item',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      // Add image picker later
-                    },
-                    icon: const Icon(Icons.add_photo_alternate_outlined),
-                    label: const Text('Add Image'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF2563EB),
-                      side: const BorderSide(color: Color(0xFF2563EB)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ),
 
